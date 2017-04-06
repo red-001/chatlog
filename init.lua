@@ -29,8 +29,8 @@ core.register_on_sending_chat_messages(function(message)
 	if modstorage:get_string("disable") == "true" then
 		return
 	end
-	if modstorage:get_string("enable_local_log") == "true" then
-		log_message(message)
+	if minetest.get_protocol_version() < 29 then
+		log_message("[Local player] " .. message)
 	end
 end)
 
@@ -46,7 +46,7 @@ local function read_log(param)
 	if id < 0 then id = 0 end
 
 	minetest.display_chat_message("**Starting to read log**")
-	for i = id, current_id, 1 do
+	for i = id, current_id-1, 1 do
 		minetest.display_chat_message(modstorage:get_string(i))
 	end
 
@@ -60,8 +60,6 @@ local function display_help()
 	minetest.display_chat_message("Clear: Clear chat log")
 	minetest.display_chat_message("Display: Shows logged messages")
 	minetest.display_chat_message("Timestamp: Set the timestamp the mod should use (lua os.date format)")
-	minetest.display_chat_message("Enable_local_log: needed to log messages sent by the local player on servers that don't use recent dev")
-	minetest.display_chat_message("Disable_local_log: needed to prevent double logging of local player messages on servers with recent dev (default)")
 end
 
 minetest.register_chatcommand("chatlog", {
@@ -78,12 +76,6 @@ minetest.register_chatcommand("chatlog", {
 			return true, "Turned logging off"
 		elseif paraml:sub(1,7) == "display" then
 			return read_log(paraml:sub(8))
-		elseif paraml:sub(1,16) == "enable_local_log" then
-			modstorage:set_string("enable_local_log", "true")
-			return true, "Enabled local logging"
-		elseif paraml:sub(1,17) == "disable_local_log" then
-			modstorage:set_string("enable_local_log", "false")
-			return true, "Disabled local logging"
 		elseif paraml:sub(1,5) == "clear" then
 			modstorage:set_int("chat_message_id", -1)
 			return true, "Cleared log"
