@@ -4,6 +4,17 @@ if modstorage:get_string("setup") == "" then
 	modstorage:set_string("setup","finished")
 end
 
+
+local function getVersion()
+	if minetest.get_protocol_version then
+		return minetest.get_protocol_version()
+	elseif minetest.get_server_info then
+		return minetest.get_server_info().protocol_version
+	else
+		error("Your minetest version is too old!")
+	end
+end
+
 local function log_message(message)
 	local id = modstorage:get_int("chat_message_id")
 	print("Debug: current id " .. id)
@@ -29,7 +40,7 @@ core.register_on_sending_chat_messages(function(message)
 	if modstorage:get_string("disable") == "true" then
 		return
 	end
-	if minetest.get_protocol_version() < 29 then
+	if getVersion() < 29 then
 		log_message("[Local player] " .. message)
 	end
 end)
